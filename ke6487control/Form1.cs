@@ -9,85 +9,37 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NationalInstruments.NI4882;
 
-namespace ke6487control
+namespace Ke648x
 {
     public partial class Form1 : Form
     {
-        
-        private int GPIBaddress = 22;
-        private Device device;
+
+        Ke648xControl pAmm;
 
         public Form1()
         {
             InitializeComponent();
-
+            pAmm = new Ke648xControl();
 
 
         }
 
         private void startGPIBbutton_Click(object sender, EventArgs e)
         {
-            try
-            {
-                Cursor.Current = Cursors.WaitCursor;
-                // Convert the Secondary Address Combo Text into a number.
-                int currentSecondaryAddress = 0;
-                int boardId = 0;
+            
+            pAmm.InitSession();
+            string stringRead = pAmm.GetIdentString();
 
-                // Intialize the device
-                device = new Device(boardId, (byte)GPIBaddress, (byte)currentSecondaryAddress);
-                //SetupControlState(true);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                Cursor.Current = Cursors.Default;
-            }
-
-            string stringToWrite = "*idn?\n";
-
-            //Write to Device
-            try
-            {
-                device.Write(ReplaceCommonEscapeSequences(stringToWrite));
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-
-            string stringRead;
-
-            //Read from Device
-            try
-            {
-                Cursor.Current = Cursors.WaitCursor;
-                stringRead = InsertCommonEscapeSequences(device.ReadString());
-                gpibReadBox.Text = stringRead;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                Cursor.Current = Cursors.Default;
-            }
+            gpibReadBox.Text = stringRead;
+            
 
         }
 
-        private string ReplaceCommonEscapeSequences(string s)
-        {
-            return s.Replace("\\n", "\n").Replace("\\r", "\r");
-        }
 
-        private string InsertCommonEscapeSequences(string s)
+        private void initDeviceButton_Click(object sender, EventArgs e)
         {
-            return s.Replace("\n", "\\n").Replace("\r", "\\r");
+            pAmm.InitDevice();
+
         }
 
     }
